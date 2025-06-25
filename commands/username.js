@@ -1,7 +1,7 @@
 const { Markup } = require("telegraf");
 const { setUserData, getUserData } = require("../data/users");
 const t = require("../utils/translate");
-const showMainMenu = require("./mainMenu.js");
+const { showMainMenu, showAdminMainMenu } = require("./mainMenu.js");
 const userStates = {};
 
 function getUserName(bot) {
@@ -10,19 +10,24 @@ function getUserName(bot) {
     const text = ctx.message.text;
     const langCode = text === "🇺🇦 Українська" ? "uk" : "pl";
     const lang = t[langCode];
-
+    if (String(chatId) === process.env.ADMIN_ID) {
+      showAdminMainMenu(ctx, langCode);
+      return;
+    }
     setUserData(chatId, { language: langCode });
 
     ctx.reply(lang.askName);
     userStates[chatId] = "waitingForName";
   });
 
-  bot.on("text", (ctx) => {
+  bot.on("text", (ctx, next) => {
     const chatId = ctx.chat.id;
     const messageText = ctx.message.text;
     const userData = getUserData(chatId);
 
-    if (!userData || !userData.language) return; // без мови — нічого не робимо
+    if (!userData || !userData.language) {
+      return next();
+    }
 
     const langCode = userData.language;
     const lang = t[langCode];
@@ -47,8 +52,8 @@ function getUserName(bot) {
       } else {
         if (langCode === "pl" && /^\d{9}$/.test(messageText)) {
           phone = "+48" + messageText;
-        } else if (langCode === "uk" && /^\d{9}$/.test(messageText)) {
-          phone = "+380" + messageText;
+        } else if (langCode === "uk" && /^\d{10}$/.test(messageText)) {
+          phone = "+38" + messageText;
         } else {
           phone = messageText;
         }
@@ -58,7 +63,10 @@ function getUserName(bot) {
       ctx.reply(lang.thanks).then(() => {
         showMainMenu(ctx, langCode);
       });
+      return;
     }
+
+    return next(); // дуже важливо!
   });
 }
 

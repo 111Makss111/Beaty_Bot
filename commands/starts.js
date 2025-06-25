@@ -1,9 +1,7 @@
 const fs = require("fs");
-const { setUserData, getUserData } = require("../data/users");
 const t = require("../utils/translate");
 
 function startCommand(bot) {
-  // Обробка /start
   bot.start((ctx) => {
     ctx.replyWithPhoto(
       { source: fs.createReadStream("./img/unnamed.png") },

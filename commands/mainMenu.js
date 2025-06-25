@@ -1,8 +1,10 @@
 const { Markup } = require("telegraf");
-const { setUserData, getUserData } = require("../data/users");
 const t = require("../utils/translate");
+const { getUserData } = require("../data/users");
+
 function showMainMenu(ctx, langCode) {
   const lang = t[langCode];
+  console.log(lang.book);
   ctx.reply(
     lang.title,
     Markup.keyboard([
@@ -13,5 +15,18 @@ function showMainMenu(ctx, langCode) {
       .resize()
   );
 }
+function showAdminMainMenu(ctx, langCode) {
+  const lang = t[langCode];
+  console.log(lang.book);
+  ctx.reply(
+    lang.adminTitle,
+    Markup.keyboard([
+      [lang.viewAllRecords, lang.blockDate],
+      [lang.blockHours, lang.addPortfolio],
+    ])
+      .oneTime()
+      .resize()
+  );
+}
 
-module.exports = showMainMenu;
+module.exports = { showMainMenu, showAdminMainMenu };
